@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IPv4Get.DTOs
 {
-    internal struct IpRange
+    public struct IpRange
     {
         [Index(0)]
         public uint IpFrom { get; set; }
@@ -26,5 +26,17 @@ namespace IPv4Get.DTOs
 
         [Index(5)]
         public string CityName { get; set; }
+
+        //[Index(6)]
+        //public double Latitude { get; set; }
+
+        //[Index(7)]
+        //public double Longitude { get; set; }
+
+        //[Index(8)]
+        //public string ZipCode { get; set; }
+
+        //[Index(9)]
+        //public string TimeZone { get; set; }
     }
 }
