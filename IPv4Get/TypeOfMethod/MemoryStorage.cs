@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IPv4Get.Validations;
 
 namespace IPv4Get.TypeOfMethod
 {
@@ -28,21 +29,17 @@ namespace IPv4Get.TypeOfMethod
 
             string extractedCsvPath = "C:\\Users\\thiago\\Documents\\trabalho\\IpGet\\IPv4Get\\bin\\Debug\\net8.0\\extracted\\IP2LOCATION-LITE-DB3.CSV";
 
+            string oldCsvPath = "C:\\Users\\thiago\\Documents\\compareCsv\\IP2LOCATION-LITE-DB11-shortv.csv";
+
             if (File.Exists(extractedCsvPath))
             {
                 var ipRanges = ReadIpRanges(extractedCsvPath);
+                var oldIpRanges = ReadIpRanges(oldCsvPath);
                 WriteIpRangesToCsv(extractedCsvPath, ipRanges);
-                
+
+                Validator.sizeValidator(ipRanges, oldIpRanges);
+                Validator.IpRangeAndDataValidator(ipRanges, oldIpRanges);
                 Console.WriteLine("Arquivo CSV atualizado com sucesso.");
-
-                int index = 0;
-                foreach (var ipRange in ipRanges)
-                {
-                    Console.WriteLine($"IP From: {ipRange.IpFrom}, IP To: {ipRange.IpTo},CountryCode: {ipRange.CountryCode}, Country: {ipRange.CountryName}, RegionName: {ipRange.RegionName}, City: {ipRange.CityName}");
-                    if (index > 20) return;
-
-                    index++;
-                }
             }
         }
 
