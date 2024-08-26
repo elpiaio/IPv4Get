@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IPv4Get.Validations;
+using IPv4Get.AwsConnection;
 
 namespace IPv4Get.TypeOfMethod
 {
@@ -39,8 +40,13 @@ namespace IPv4Get.TypeOfMethod
 
                 Validator.sizeValidator(ipRanges, oldIpRanges);
                 Validator.IpRangeAndDataValidator(ipRanges, oldIpRanges);
-                Console.WriteLine("Arquivo CSV atualizado com sucesso.");
+
             }
+
+            //TransformarArquivo em memorystream e fazer upload pra aws
+            var file = File.ReadAllBytes(extractedCsvPath);
+            AwsS3.UploadFile(new MemoryStream(file));
+
         }
 
         public static IEnumerable<IpRange> ReadIpRanges(string csvFilePath)

@@ -14,6 +14,7 @@ namespace IPv4Get.TypeOfMethod
     {
         public static async Task PhysicalStorageInit() 
         {
+            string fileName = " IP2LOCATION-LITE-2024-08.csv";
             string token = "0DkhpZw80xHUSgy3avbA2CEg9DpcQFfOwXMuP5dT9EC979iXUY74JUpcMXlQjm6D";
             string databaseCode = "DB3LITECSV";
 
@@ -29,7 +30,6 @@ namespace IPv4Get.TypeOfMethod
                 var ipRanges = ReadIpRanges(extractedCsvPath);
                 WriteIpRangesToCsv(extractedCsvPath, ipRanges);
                 Console.WriteLine("Arquivo CSV atualizado com sucesso.");
-                validator(ipRanges);
                 int index = 0;
                 foreach (var ipRange in ipRanges)
                 {
@@ -122,18 +122,6 @@ namespace IPv4Get.TypeOfMethod
                 csv.WriteHeader<IpRange>();
                 csv.NextRecord();
                 csv.WriteRecords(ipRanges);
-            }
-        }
-
-        public static string validator(IEnumerable<IpRange> ipRanges)
-        {
-            try
-            {
-                return "vapo";
-            }
-            catch
-            {
-                return "error";
             }
         }
     }

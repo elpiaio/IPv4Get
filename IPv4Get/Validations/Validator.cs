@@ -38,6 +38,8 @@ namespace IPv4Get.Validations
                 var oldIpRange = oldIpRanges.Where(ip => ip.CountryCode == ipRange.CountryCode).FirstOrDefault();
                 if(oldIpRange.CountryName != ipRange.CountryName) throw new InvalidOperationException("Os dados do pais estão vindo diferentes");
                 count++;
+
+                if (count == 30) return;
             }
         }
     }
