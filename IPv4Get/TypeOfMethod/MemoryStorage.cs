@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IPv4Get.Validations;
 using IPv4Get.AwsConnection;
+using System.IO.Compression;
 
 namespace IPv4Get.TypeOfMethod
 {
@@ -16,37 +17,27 @@ namespace IPv4Get.TypeOfMethod
     {
         public static async Task MemoryStorageInit()
         {
-            /*
-            string token = "2F8jiHl1R9L5aDrviytmCFGUFzicmsag6j7aMoGCpOyKPLoZENKMwM8GOp8637Xi";
+            var oldIpRanges = await AwsS3.GetLastFile();
+            if (oldIpRanges.Count() < 1) throw new Exception("OLD IPS IS NUll");
+            
+            string token = "";
             string databaseCode = "DB3LITECSV";
-
             string downloadUrl = $"https://www.ip2location.com/download/?token={token}&file={databaseCode}";
 
-            string zipFilePath = await DownloadFileAsync(downloadUrl, "ips.zip");
-            string extractedCsvPath = "";
-
-            if (zipFilePath != "") extractedCsvPath = ExtractCsvFromZip(zipFilePath);
-            */
-
-            string extractedCsvPath = "C:\\Users\\thiago\\Documents\\trabalho\\IpGet\\IPv4Get\\bin\\Debug\\net8.0\\extracted\\IP2LOCATION-LITE-DB3.CSV";
-
-            string oldCsvPath = "C:\\Users\\thiago\\Documents\\compareCsv\\IP2LOCATION-LITE-DB11-shortv.csv";
-
+            string zipFilePath = await DownloadFileAsync(downloadUrl, "ips.zip"); //revisar aqui
+            var extractedCsvPath = ExtractCsvFromZip(zipFilePath);
+            
             if (File.Exists(extractedCsvPath))
             {
                 var ipRanges = ReadIpRanges(extractedCsvPath);
-                var oldIpRanges = ReadIpRanges(oldCsvPath);
                 WriteIpRangesToCsv(extractedCsvPath, ipRanges);
-
                 Validator.sizeValidator(ipRanges, oldIpRanges);
                 Validator.IpRangeAndDataValidator(ipRanges, oldIpRanges);
-
             }
 
             //TransformarArquivo em memorystream e fazer upload pra aws
             var file = File.ReadAllBytes(extractedCsvPath);
             AwsS3.UploadFile(new MemoryStream(file));
-
         }
 
         public static IEnumerable<IpRange> ReadIpRanges(string csvFilePath)
@@ -80,6 +71,55 @@ namespace IPv4Get.TypeOfMethod
                 csv.WriteHeader<IpRange>();
                 csv.NextRecord();
                 csv.WriteRecords(ipRanges);
+            }
+        }
+        static async Task<string> DownloadFileAsync(string url, string fileName)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+                        using (var fs = new FileStream(filePath, FileMode.Create))
+                        {
+                            await response.Content.CopyToAsync(fs);
+                            Console.WriteLine($"Arquivo baixado com sucesso: {filePath}");
+                            return filePath;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Erro ao baixar o arquivo: {response.StatusCode}");
+                        return null;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    return "";
+                }
+            }
+        }
+        static string ExtractCsvFromZip(string zipFilePath)
+        {
+            try
+            {
+                string extractPath = Path.Combine(Directory.GetCurrentDirectory(), "extracted");
+                Directory.CreateDirectory(extractPath);
+
+                ZipFile.ExtractToDirectory(zipFilePath, extractPath, overwriteFiles: true);
+                Console.WriteLine($"Arquivo extrai­do para: {extractPath}");
+
+                string csvFilePath = Directory.GetFiles(extractPath, "*.csv")[0];
+                return csvFilePath;
+            }
+            catch (InvalidDataException ex)
+            {
+                Console.WriteLine($"Erro ao extrair o arquivo ZIP: {ex.Message}");
+                return "erro";
             }
         }
     }
